@@ -114,9 +114,9 @@ def _run_listener():
 
 def main():
     """CLI entry point — route to subcommand or default listener."""
-    if len(sys.argv) > 1 and sys.argv[1] == "init":
-        from voice_coding.init_cmd import run_init
-        run_init()
+    if len(sys.argv) > 1 and sys.argv[1] == "learn":
+        from voice_coding.learn_cmd import run_learn
+        run_learn()
     else:
         _run_listener()
 
