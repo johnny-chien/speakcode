@@ -10,7 +10,7 @@ Private voice-to-text for developers. Hold a hotkey, speak, get text pasted into
 ## Install
 
 ```bash
-pip install voice-coding
+pip install speakandcode
 ```
 
 ## Setup
