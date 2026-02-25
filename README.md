@@ -1,4 +1,4 @@
-# Voice Coding
+# SpeakCode
 
 Private voice-to-text for developers. Hold a hotkey, speak, get text pasted into any app.
 
@@ -11,6 +11,12 @@ Private voice-to-text for developers. Hold a hotkey, speak, get text pasted into
 
 ```bash
 pip install speakcode
+```
+
+Or with pipx for an isolated install:
+
+```bash
+pipx install speakcode
 ```
 
 ## Setup
@@ -34,25 +40,6 @@ Your terminal app (Terminal.app / iTerm / VS Code) needs two permissions in **Sy
 
 After granting Accessibility, **restart your terminal app** for the permission to take effect.
 
-## Learn Project Vocabulary (Optional)
-
-Teach Voice Coding the vocabulary of any project you work on:
-
-```bash
-cd /path/to/your/project
-speak learn
-```
-
-This scans the repo (README, package.json, etc.) and merges its vocabulary into your global memory at `~/.voice-coding/memory.md`. Run it in each repo you work on — terms accumulate across projects.
-
-The memory file includes:
-
-- **Vocabulary** — project-specific terms with disambiguation hints (e.g., "Claude Code" not "clock code")
-- **Context** — brief descriptions of your projects and tech stacks
-- **Notes** — space for personal customizations (accent, language mixing, corrections you've noticed)
-
-Edit `~/.voice-coding/memory.md` anytime to add or fix terms.
-
 ## Usage
 
 ```bash
@@ -69,9 +56,28 @@ Press **Ctrl+C** to quit.
 - Minor grammar is corrected while preserving your original wording
 - Recordings shorter than 0.5 seconds are ignored to prevent accidental triggers
 
+## Learn Project Vocabulary (Optional)
+
+Teach SpeakCode the vocabulary of any project you work on:
+
+```bash
+cd /path/to/your/project
+speak learn
+```
+
+This scans the repo (README, package.json, etc.) and merges its vocabulary into your global memory at `~/.voice-coding/memory.md`. Run it in each repo you work on — terms accumulate across projects.
+
+The memory file includes:
+
+- **Vocabulary** — project-specific terms with disambiguation hints (e.g., "Claude Code" not "clock code")
+- **Context** — brief descriptions of your projects and tech stacks
+- **Notes** — space for personal customizations (accent, language mixing, corrections you've noticed)
+
+Edit `~/.voice-coding/memory.md` anytime to add or fix terms.
+
 ## Coding Transforms
 
-Voice Coding post-processes transcriptions with coding-aware rules:
+SpeakCode post-processes transcriptions with coding-aware rules:
 
 | You say | You get |
 |---------|---------|
