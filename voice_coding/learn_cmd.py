@@ -88,10 +88,15 @@ def _gather_repo_context(repo_dir: Path) -> str:
 def run_learn():
     """Scan current repo and merge its vocabulary into global memory."""
     load_dotenv()
+    global_env = GLOBAL_MEMORY_DIR / ".env"
+    if not os.environ.get("GEMINI_API_KEY") and global_env.is_file():
+        load_dotenv(global_env)
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        print("Error: GEMINI_API_KEY not set. Copy .env.example to .env and fill it in.")
+        print("Error: GEMINI_API_KEY not set.")
+        print("  Option 1: export GEMINI_API_KEY=your_key")
+        print(f"  Option 2: echo 'GEMINI_API_KEY=your_key' > {global_env}")
         sys.exit(1)
 
     repo_dir = Path.cwd()

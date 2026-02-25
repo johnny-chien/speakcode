@@ -10,18 +10,20 @@ Private voice-to-text for developers. Hold a hotkey, speak, get text pasted into
 ## Install
 
 ```bash
-cd /path/to/voice-coding
-pip install -e .
+pip install voice-coding
 ```
 
 ## Setup
 
 1. Get a [Gemini API key](https://aistudio.google.com/apikey)
-2. Create your `.env`:
+2. Set your API key:
    ```bash
-   cp .env.example .env
+   export GEMINI_API_KEY=your_key_here
    ```
-3. Paste your API key into `.env`
+   Or create a `~/.voice-coding/.env` file:
+   ```
+   GEMINI_API_KEY=your_key_here
+   ```
 
 ### macOS Permissions
 

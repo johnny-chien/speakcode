@@ -3,6 +3,7 @@
 import os
 import sys
 import threading
+from pathlib import Path
 
 import Quartz
 from dotenv import load_dotenv
@@ -12,14 +13,25 @@ from voice_coding.postprocessor import postprocess
 from voice_coding.recorder import Recorder, SAMPLE_RATE
 from voice_coding.transcriber import transcribe
 
+GLOBAL_ENV = Path.home() / ".voice-coding" / ".env"
+
+
+def _load_env():
+    """Load .env from cwd first, then global ~/.voice-coding/.env as fallback."""
+    load_dotenv()
+    if not os.environ.get("GEMINI_API_KEY") and GLOBAL_ENV.is_file():
+        load_dotenv(GLOBAL_ENV)
+
 
 def _run_listener():
     """Run the hold-to-record voice coding listener."""
-    load_dotenv()
+    _load_env()
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        print("Error: GEMINI_API_KEY not set. Copy .env.example to .env and fill it in.")
+        print("Error: GEMINI_API_KEY not set.")
+        print("  Option 1: export GEMINI_API_KEY=your_key")
+        print(f"  Option 2: echo 'GEMINI_API_KEY=your_key' > {GLOBAL_ENV}")
         sys.exit(1)
 
     recorder = Recorder()

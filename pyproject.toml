@@ -9,6 +9,21 @@ description = "Private voice-to-text for developers. Hold a key, speak, get text
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
+authors = [
+    { name = "Johnny Chien" },
+]
+keywords = ["voice", "coding", "transcription", "developer-tools", "voice-to-text"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: MacOS X",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "sounddevice>=0.5",
     "soundfile>=0.12",
@@ -16,7 +31,12 @@ dependencies = [
     "pynput>=1.7",
     "google-genai>=1.0",
     "python-dotenv>=1.0",
+    "pyobjc-framework-Quartz>=9.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/johnny-chien/voice-coding"
+Repository = "https://github.com/johnny-chien/voice-coding"
 
 [project.scripts]
 voice = "voice_coding.main:main"
