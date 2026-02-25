@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voice-coding"
+version = "0.1.0"
+description = "Private voice-to-text for developers. Hold a key, speak, get text pasted into any app."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "sounddevice>=0.5",
+    "soundfile>=0.12",
+    "numpy>=1.24",
+    "pynput>=1.7",
+    "google-genai>=1.0",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+voice = "voice_coding.main:main"
+
+[tool.setuptools.packages.find]
+include = ["voice_coding*"]
