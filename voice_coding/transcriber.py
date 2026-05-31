@@ -1,13 +1,15 @@
-"""Gemini Flash transcription."""
+"""Transcription backends — Gemini Flash and OpenAI gpt-4o-mini-transcribe."""
 
 from google import genai
 from google.genai import types
+from openai import OpenAI
 
 from voice_coding.memory import load_memory
 
-MODEL = "gemini-3-flash-preview"
+GEMINI_MODEL = "gemini-3-flash-preview"
+OPENAI_MODEL = "gpt-4o-mini-transcribe"
 
-BASE_PROMPT = (
+GEMINI_BASE_PROMPT = (
     "Transcribe this audio exactly as spoken. Output ONLY the transcription text. "
     "No preamble, no labels, no commentary. Start directly with the spoken content. "
     "Rules:\n"
@@ -28,22 +30,34 @@ BASE_PROMPT = (
     "  - 'localhost' (not 'local host')"
 )
 
+# OpenAI's transcription prompt param biases vocabulary/style — it is not an
+# instruction channel like a chat system prompt. Keep it term-focused.
+OPENAI_VOCAB_PROMPT = (
+    "Software developer dictating code, code-switching between English and "
+    "Traditional Chinese (繁體中文). Common terms: VS Code, GitHub, npm, API, "
+    "CLI, JSON, regex, localhost, TypeScript, Python, Docker, Kubernetes, "
+    "PostgreSQL, Redis, async, await, bash, zsh, stdout, stderr."
+)
 
-def _build_prompt() -> str:
-    """Build transcription prompt, appending memory.md if found."""
+# Cap memory injected into OpenAI prompt. gpt-4o-transcribe's prompt accepts
+# more than Whisper's 224 tokens, but there is still a limit — stay well under.
+OPENAI_MEMORY_CHAR_LIMIT = 2000
+
+
+def _build_gemini_prompt() -> str:
+    """Build Gemini prompt, appending memory.md if found."""
     memory = load_memory()
     if not memory:
-        return BASE_PROMPT
-    return BASE_PROMPT + "\n\n--- Project-specific context (from .voice-coding/memory.md) ---\n\n" + memory
+        return GEMINI_BASE_PROMPT
+    return GEMINI_BASE_PROMPT + "\n\n--- Project-specific context (from .voice-coding/memory.md) ---\n\n" + memory
 
 
-def transcribe(wav_bytes: bytes, api_key: str) -> str:
-    """Send WAV audio to Gemini Flash and return the transcription text."""
+def _transcribe_gemini(wav_bytes: bytes, api_key: str) -> str:
     client = genai.Client(api_key=api_key)
-    prompt = _build_prompt()
+    prompt = _build_gemini_prompt()
 
     response = client.models.generate_content(
-        model=MODEL,
+        model=GEMINI_MODEL,
         contents=[
             prompt,
             types.Part.from_bytes(data=wav_bytes, mime_type="audio/wav"),
@@ -53,12 +67,43 @@ def transcribe(wav_bytes: bytes, api_key: str) -> str:
         ),
     )
 
-    # Log finish reason and token usage for debugging
     if response.candidates:
-        candidate = response.candidates[0]
-        print(f"🔍 Finish reason: {candidate.finish_reason}")
+        print(f"🔍 Finish reason: {response.candidates[0].finish_reason}")
     if response.usage_metadata:
         meta = response.usage_metadata
         print(f"🔍 Tokens — prompt: {meta.prompt_token_count}, output: {meta.candidates_token_count}")
 
+    # response.text is None when the model returns no text part (e.g. a SAFETY
+    # or MAX_TOKENS finish) — turn that into a clear error, not a bare
+    # AttributeError on .strip().
+    if response.text is None:
+        reason = response.candidates[0].finish_reason if response.candidates else "unknown"
+        raise RuntimeError(
+            f"Gemini returned no text (finish_reason={reason}) — audio may be silent or blocked."
+        )
     return response.text.strip()
+
+
+def _build_openai_prompt() -> str:
+    """Short vocab prompt, with a truncated memory.md appended if present."""
+    memory = load_memory()
+    if not memory:
+        return OPENAI_VOCAB_PROMPT
+    return OPENAI_VOCAB_PROMPT + "\n\n" + memory[:OPENAI_MEMORY_CHAR_LIMIT]
+
+
+def _transcribe_openai(wav_bytes: bytes, api_key: str) -> str:
+    client = OpenAI(api_key=api_key)
+    response = client.audio.transcriptions.create(
+        model=OPENAI_MODEL,
+        file=("audio.wav", wav_bytes, "audio/wav"),
+        prompt=_build_openai_prompt(),
+    )
+    return response.text.strip()
+
+
+def transcribe(wav_bytes: bytes, backend: str, api_key: str) -> str:
+    """Dispatch to the configured transcription backend ('gemini' or 'openai')."""
+    if backend == "openai":
+        return _transcribe_openai(wav_bytes, api_key)
+    return _transcribe_gemini(wav_bytes, api_key)
